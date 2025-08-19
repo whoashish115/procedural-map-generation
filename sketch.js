@@ -269,3 +269,103 @@ function buildRules(ref) {
 
   return R;
 }
+
+function solveStep(steps) {
+  let count = 0;
+
+  while (count < steps) {
+    if (todo.length === 0) {
+      const anyBad = rescanAll();
+      if (!anyBad) break;
+    }
+
+    let bestIndex = -1;
+    let bestConflict = -1;
+
+    for (let i = 0; i < todo.length; i++) {
+      const node = todo[i];
+      if (queued[node.r][node.c] !== true) continue;
+
+     const sc = badness[node.r][node.c];
+      if (sc > bestConflict) {
+        bestConflict = sc;
+        bestIndex = i;
+      }
+    }
+
+    if (bestIndex === -1) {
+      todo = [];
+      continue;
+    }
+
+    const node = todo.splice(bestIndex, 1)[0];
+    queued[node.r][node.c] = false;
+
+    const r = node.r;
+    const c = node.c;
+
+    if (locked[r][c]) {
+      badness[r][c] = 0;
+      count++;
+      continue;
+    }
+
+    const current = world[r][c];
+    const choice = pickTerrain(r, c, current);
+
+    if (choice.terrain !== current) {
+      world[r][c] = choice.terrain;
+      redrawCell(r, c);
+    }
+
+    badness[r][c] = choice.score;
+    dirtyAround(r, c);
+    count++;
+  }
+}
+
+function pickTerrain(r, c, wasT) {
+  let bestScore = Infinity;
+  let ties = [];
+
+  for (let t = 0; t < TERRAIN_COUNT; t++) {
+    const s = scoreOf(r, c, t);
+
+    if (s < bestScore - 1e-9) {
+      bestScore = s;
+      ties = [t];
+    } else if (abs(s - bestScore) <= 1e-9) {
+      ties.push(t);
+    }
+  }
+
+  if (ties.length === 0) {
+    return { terrain: wasT, score: scoreOf(r, c, wasT) };
+  }
+
+  const picked = random(ties);
+  return { terrain: picked, score: bestScore };
+}
+
+function scoreOf(r, c, t) {
+  let score = 0;
+  let same = 0;
+  let total = 0;
+
+  for (let d = 0; d < DIR_COUNT; d++) {
+    const nr = r + DIRS[d][0];
+    const nc = c + DIRS[d][1];
+    if (nr < 0 || nc < 0 || nr >= rows || nc >= cols) continue;
+
+    total++;
+    const nt = world[nr][nc];
+    if (nt === t) same++;
+    if (!rules[t][d][nt]) score += 1;
+  }
+
+  if (total > 0) {
+    score += (1 - same / total) * 0.15;
+  }
+
+  return score;
+}

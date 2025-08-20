@@ -355,7 +355,7 @@ function scoreOf(r, c, t) {
   for (let d = 0; d < DIR_COUNT; d++) {
     const nr = r + DIRS[d][0];
     const nc = c + DIRS[d][1];
-    if (nr < 0 || nc < 0 || nr >= rows || nc >= cols) continue;
+    if (nr < 0 || nc < 0 || nr > rows || nc > cols) continue;
 
     total++;
     const nt = world[nr][nc];

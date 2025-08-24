@@ -369,3 +369,138 @@ function scoreOf(r, c, t) {
 
   return score;
 }
+
+function redrawCell(r, c) {
+  const x = c * cellSize;
+  const y = r * cellSize;
+  const t = world[r][c];
+  const col = getColors()[t];
+
+  mapLayer.noStroke();
+  mapLayer.fill(col[0], col[1], col[2]);
+  mapLayer.rect(x, y, cellSize, cellSize);
+
+  if (locked[r][c]) {
+    mapLayer.stroke(0, 0, 0, 30);
+    mapLayer.noFill();
+    mapLayer.rect(x + 0.5, y + 0.5, cellSize - 1, cellSize - 1);
+    mapLayer.noStroke();
+  }
+}
+
+function redrawEverything() {
+  if (!mapLayer) return;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      redrawCell(r, c);
+    }
+  }
+}
+
+function enqueue(r, c) {
+  if (r < 0 || c < 0 || r >= rows || c >= cols) return;
+  if (queued[r][c]) return;
+  queued[r][c] = true;
+  todo.push({ r, c });
+}
+
+function dirtyAround(r, c) {
+  enqueue(r, c);
+  for (let d = 0; d < DIR_COUNT; d++) {
+    enqueue(r + DIRS[d][0], c + DIRS[d][1]);
+  }
+}
+
+function brushCells(type, size) {
+  const out = [];
+
+  for (let rr = -size; rr <= size; rr++) {
+    for (let cc = -size; cc <= size; cc++) {
+      const ar = abs(rr);
+      const ac = abs(cc);
+
+      let keep = false;
+
+      if (type === "circle") {
+        keep = rr * rr + cc * cc <= size * size;
+      } else if (type === "square") {
+        keep = true;
+      } else if (type === "diamond") {
+        keep = ar + ac <= size;
+      } else if (type === "cross") {
+        keep = rr === 0 || cc === 0;
+      } else if (type === "plus") {
+        keep =
+          rr === 0 ||
+          cc === 0 ||
+          (ar + ac <= max(1, size - 1) && (ar === 0 || ac === 0));
+      } else if (type === "ring") {
+        const d2 = rr * rr + cc * cc;
+        keep = d2 <= size * size && d2 >= max(0, (size - 1) * (size - 1));
+      } else if (type === "lineH") {
+        keep = rr === 0;
+      } else if (type === "lineV") {
+        keep = cc === 0;
+      } else if (type === "scatter") {
+        keep = random() < 0.45 && rr * rr + cc * cc <= size * size;
+      } else if (type === "checker") {
+        keep = ((rr + cc) & 1) === 0 && rr * rr + cc * cc <= size * size;
+      } else {
+        keep = rr * rr + cc * cc <= size * size;
+      }
+
+      if (keep) out.push([rr, cc]);
+    }
+  }
+
+  return out;
+}
+
+function paintAt(mx, my) {
+  if (mx < 0 || my < 0 || mx >= mapW || my >= mapH) return;
+
+  const gx = floor(mx / cellSize);
+  const gy = floor(my / cellSize);
+  const cells = brushCells(brushType, brushSize);
+
+  for (const [rr, cc] of cells) {
+    const r = gy + rr;
+    const c = gx + cc;
+    if (r < 0 || c < 0 || r >= rows || c >= cols) continue;
+
+    if (curTerrain === -1) {
+      locked[r][c] = false;
+      world[r][c] = floor(random(TERRAIN_COUNT));
+    } else {
+      locked[r][c] = true;
+      world[r][c] = curTerrain;
+    }
+
+    redrawCell(r, c);
+    dirtyAround(r, c);
+  }
+}
+
+function drawCursor() {
+  if (mouseX < 0 || mouseY < 0 || mouseX >= mapW || mouseY >= mapH) return;
+
+  const gx = floor(mouseX / cellSize) * cellSize;
+  const gy = floor(mouseY / cellSize) * cellSize;
+
+  noFill();
+  stroke(255, 255, 255, 140);
+  strokeWeight(1);
+  rect(gx + 0.5, gy + 0.5, cellSize, cellSize);
+
+  if (!drawMode) return;
+
+  const cells = brushCells(brushType, brushSize);
+  stroke(255, 255, 255, 55);
+
+  for (const [rr, cc] of cells) {
+    const r = floor(mouseY / cellSize) + rr;
+    const c = floor(mouseX / cellSize) + cc;
+    if (r < 0 || c < 0 || r >= rows || c >= cols) continue;
+    rect(c * cellSize + 0.5, r * cellSize + 0.5, cellSize, cellSize);
+  }
+}

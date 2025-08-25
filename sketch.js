@@ -504,3 +504,83 @@ function drawCursor() {
     rect(c * cellSize + 0.5, r * cellSize + 0.5, cellSize, cellSize);
   }
 }
+
+function updateStats() {
+  const stats = document.getElementById("stats");
+  if (!stats) return;
+
+  stats.textContent =
+    "mode: " +
+    (drawMode ? "drawing" : "solving") +
+    "\n" +
+    "reference: " +
+    refs[refIdx].name +
+    "\n" +
+    "palette: " +
+    palettes[palIdx].name +
+    "\n" +
+    "terrain: " +
+    (curTerrain === -1 ? "erase" : TERRAIN_NAMES[curTerrain]) +
+    "\n" +
+    "brush: " +
+    brushType +
+    "\n" +
+    "cell size: " +
+    cellSize +
+    "\n" +
+    "brush size: " +
+    brushSize +
+    "\n" +
+    "solve/frame: " +
+    stepsPerFrame +
+    "\n" +
+    "seed: " +
+    seed +
+    "\n" +
+    "map: " +
+    cols +
+    " x " +
+    rows;
+}
+
+function clearWorld() {
+  todo = [];
+  queued = Array.from({ length: rows }, () => Array(cols).fill(false));
+
+  randomSeed(seed);
+  noiseSeed(seed);
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      world[r][c] = floor(random(TERRAIN_COUNT));
+      locked[r][c] = false;
+      badness[r][c] = 0;
+      redrawCell(r, c);
+    }
+  }
+
+  rescanAll();
+}
+
+function rescanAll() {
+  todo = [];
+  let anyBad = false;
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      queued[r][c] = false;
+      if (!locked[r][c]) {
+        const sc = scoreOf(r, c, world[r][c]);
+        badness[r][c] = sc;
+        if (sc > 0) {
+          enqueue(r, c);
+          anyBad = true;
+        }
+      } else {
+        badness[r][c] = 0;
+      }
+    }
+  }
+
+  return anyBad;
+}

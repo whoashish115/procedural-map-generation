@@ -584,12 +584,3 @@ function rescanAll() {
 
   return anyBad;
 }
-
-// DEBUG
-function debugSolver() {
-  console.log('todo length:', todo.length);
-  console.log('world[0][0]:', world[0][0]);
-  for (let r = 0; r < min(5, rows); r++) {
-    console.log('row ' + r + ':', world[r].slice(0,10).join(','));
-  }
-}

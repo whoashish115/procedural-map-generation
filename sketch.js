@@ -738,3 +738,187 @@ function buildReferenceSets() {
     { name: "canyon", grid: makeReference(8) },
   ];
 }
+
+function makeReference(kind, w = 12, h = 12) {
+  const g = Array.from({ length: h }, () => Array(w).fill(T.WATER));
+
+  const set = (r, c, t) => {
+    if (r >= 0 && c >= 0 && r < h && c < w) g[r][c] = t;
+  };
+
+  const rect = (x0, y0, x1, y1, t) => {
+    for (let r = y0; r <= y1; r++) {
+      for (let c = x0; c <= x1; c++) {
+        set(r, c, t);
+      }
+    }
+  };
+
+  const diamond = (cx, cy, rad, t) => {
+    for (let r = 0; r < h; r++) {
+      for (let c = 0; c < w; c++) {
+        if (abs(r - cy) + abs(c - cx) <= rad) set(r, c, t);
+      }
+    }
+  };
+
+  const circle = (cx, cy, rad, t) => {
+    for (let r = 0; r < h; r++) {
+      for (let c = 0; c < w; c++) {
+        const dx = c - cx;
+        const dy = r - cy;
+        if (sqrt(dx * dx + dy * dy) <= rad) set(r, c, t);
+      }
+    }
+  };
+
+  const line = (x0, y0, x1, y1, t, thickness = 0) => {
+    const steps = max(abs(x1 - x0), abs(y1 - y0)) * 6 + 1;
+
+    for (let i = 0; i <= steps; i++) {
+      const u = i / steps;
+      const x = x0 + (x1 - x0) * u;
+      const y = y0 + (y1 - y0) * u;
+
+      for (let rr = -thickness; rr <= thickness; rr++) {
+        for (let cc = -thickness; cc <= thickness; cc++) {
+          set(round(y) + rr, round(x) + cc, t);
+        }
+      }
+    }
+  };
+
+  const borderWater = () => {
+    rect(0, 0, w - 1, h - 1, T.WATER);
+  };
+
+  switch (kind) {
+    case 0:
+      borderWater();
+      circle(5.5, 5.5, 5.0, T.SAND);
+      circle(5.5, 5.5, 4.0, T.GRASS);
+      circle(5.5, 5.5, 3.0, T.FOREST);
+      circle(5.5, 5.5, 1.8, T.MOUNTAIN);
+      set(5, 5, T.SNOW);
+      break;
+
+    case 1:
+      rect(0, 0, w - 1, 2, T.WATER);
+      rect(0, 3, w - 1, 4, T.SAND);
+      rect(0, 5, w - 1, 7, T.GRASS);
+      rect(0, 8, w - 1, 9, T.FOREST);
+      rect(0, 10, w - 1, 11, T.MOUNTAIN);
+      for (let c = 0; c < w; c += 3) set(2, c, T.WATER);
+      for (let c = 1; c < w; c += 4) set(4, c, T.SAND);
+      break;
+
+    case 2:
+      borderWater();
+      rect(0, 0, w - 1, 1, T.WATER);
+      rect(0, 10, w - 1, 11, T.WATER);
+      line(1, 1, 10, 10, T.WATER, 1);
+      line(2, 1, 9, 9, T.SAND, 0);
+      line(1, 3, 10, 8, T.GRASS, 1);
+      line(3, 1, 8, 10, T.FOREST, 0);
+      set(5, 5, T.MOUNTAIN);
+      set(6, 6, T.MOUNTAIN);
+      break;
+
+    case 3:
+      borderWater();
+      circle(5.5, 5.5, 5.0, T.WATER);
+      circle(5.5, 5.5, 4.2, T.SAND);
+      circle(5.5, 5.5, 3.3, T.GRASS);
+      circle(5.5, 5.5, 2.4, T.FOREST);
+      circle(5.5, 5.5, 1.5, T.MOUNTAIN);
+      set(5, 5, T.SNOW);
+      set(6, 6, T.SNOW);
+      break;
+
+    case 4:
+      borderWater();
+      circle(5.5, 5.5, 5.0, T.WATER);
+      circle(5.5, 5.5, 4.1, T.SAND);
+      circle(5.5, 5.5, 3.3, T.GRASS);
+      circle(5.5, 5.5, 2.5, T.FOREST);
+      circle(5.5, 5.5, 1.7, T.MOUNTAIN);
+      set(5, 5, T.SNOW);
+      break;
+
+    case 5:
+      for (let r = 0; r < h; r++) {
+        for (let c = 0; c < w; c++) {
+          const block = (floor(r / 2) + floor(c / 2)) % 6;
+          g[r][c] =
+            block === 0
+              ? T.WATER
+              : block === 1
+                ? T.SAND
+                : block === 2
+                  ? T.GRASS
+                  : block === 3
+                    ? T.FOREST
+                    : block === 4
+                      ? T.MOUNTAIN
+                      : T.SNOW;
+        }
+      }
+      break;
+
+    case 6:
+      for (let r = 0; r < h; r++) {
+        const band =
+          r < 2
+            ? T.WATER
+            : r < 4
+              ? T.SAND
+              : r < 6
+                ? T.GRASS
+                : r < 8
+                  ? T.FOREST
+                  : r < 10
+                    ? T.MOUNTAIN
+                    : T.SNOW;
+
+        for (let c = 0; c < w; c++) {
+          g[r][c] = band;
+        }
+      }
+      for (let c = 0; c < w; c += 2) {
+        set(3, c, T.WATER);
+        set(5, c, T.GRASS);
+        set(7, c, T.FOREST);
+        set(9, c, T.MOUNTAIN);
+      }
+      break;
+
+    case 7:
+      borderWater();
+      rect(0, 0, w - 1, 3, T.WATER);
+      line(6, 0, 6, 11, T.WATER, 1);
+      line(6, 3, 3, 8, T.WATER, 0);
+      line(6, 3, 9, 8, T.WATER, 0);
+      line(6, 4, 4, 10, T.SAND, 0);
+      line(6, 4, 8, 10, T.SAND, 0);
+      line(6, 5, 5, 11, T.GRASS, 1);
+      line(6, 5, 7, 11, T.GRASS, 1);
+      set(6, 6, T.FOREST);
+      set(5, 6, T.MOUNTAIN);
+      set(7, 6, T.MOUNTAIN);
+      break;
+
+    case 8:
+      rect(0, 0, w - 1, h - 1, T.GRASS);
+      rect(4, 0, 7, h - 1, T.SAND);
+      rect(5, 0, 6, h - 1, T.WATER);
+      rect(3, 0, 3, h - 1, T.FOREST);
+      rect(8, 0, 8, h - 1, T.FOREST);
+      rect(2, 0, 2, h - 1, T.MOUNTAIN);
+      rect(9, 0, 9, h - 1, T.MOUNTAIN);
+      set(5, 5, T.SNOW);
+      set(6, 6, T.SNOW);
+      break;
+  }
+
+  return g;
+}

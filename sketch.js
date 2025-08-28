@@ -584,3 +584,157 @@ function rescanAll() {
 
   return anyBad;
 }
+
+function setActiveReference(idx) {
+  refIdx = idx;
+  rules = buildRules(refs[refIdx].grid);
+  rescanAll();
+  update_preset_active();
+}
+
+function setActivePalette(idx) {
+  palIdx = idx;
+  redrawEverything();
+  refreshGalleryThumbs();
+  update_preset_active();
+}
+
+function update_preset_active() {
+  referenceButtons.forEach((b, i) =>
+    b.classList.toggle("active", i === refIdx),
+  );
+  paletteButtons.forEach((b, i) =>
+    b.classList.toggle("active", i === palIdx),
+  );
+}
+
+function buildPresetGalleries() {
+  const referenceGrid = document.getElementById("referenceGrid");
+  const paletteGrid = document.getElementById("paletteGrid");
+
+  referenceGrid.innerHTML = "";
+  paletteGrid.innerHTML = "";
+  referenceButtons = [];
+  paletteButtons = [];
+
+  refs.forEach((ref, idx) => {
+    const btn = document.createElement("button");
+    btn.className = "presetBtn";
+    btn.title = ref.name;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = 72;
+    canvas.height = 72;
+
+    const title = document.createElement("div");
+    title.className = "title";
+    title.textContent = ref.name;
+
+    btn.appendChild(canvas);
+    btn.appendChild(title);
+
+    btn.addEventListener("click", () => {
+      setActiveReference(idx);
+    });
+
+    referenceGrid.appendChild(btn);
+    referenceButtons.push(btn);
+  });
+
+  palettes.forEach((pal, idx) => {
+    const btn = document.createElement("button");
+    btn.className = "presetBtn";
+    btn.title = pal.name;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = 120;
+    canvas.height = 28;
+
+    const title = document.createElement("div");
+    title.className = "title";
+    title.textContent = pal.name;
+
+    btn.appendChild(canvas);
+    btn.appendChild(title);
+
+    btn.addEventListener("click", () => {
+      setActivePalette(idx);
+    });
+
+    paletteGrid.appendChild(btn);
+    paletteButtons.push(btn);
+  });
+
+  update_preset_active();
+  refreshGalleryThumbs();
+}
+
+function refreshGalleryThumbs() {
+  const currentColors = getColors();
+
+  referenceButtons.forEach((btn, idx) => {
+    const canvas = btn.querySelector("canvas");
+    drawRefrenceThumb(canvas, refs[idx].grid, currentColors);
+  });
+
+  paletteButtons.forEach((btn, idx) => {
+    const canvas = btn.querySelector("canvas");
+    drawPaletteThumb(canvas, palettes[idx].colors);
+  });
+}
+
+function drawRefrenceThumb(canvasEl, grid, paletteColors) {
+  const ctx = canvasEl.getContext("2d");
+  const w = canvasEl.width;
+  const h = canvasEl.height;
+  const rowsN = grid.length;
+  const colsN = grid[0].length;
+  const cw = w / colsN;
+  const ch = h / rowsN;
+
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = "#111";
+  ctx.fillRect(0, 0, w, h);
+
+  for (let r = 0; r < rowsN; r++) {
+    for (let c = 0; c < colsN; c++) {
+      const t = grid[r][c];
+      const col = paletteColors[t];
+      ctx.fillStyle = `rgb(${col[0]},${col[1]},${col[2]})`;
+      ctx.fillRect(c * cw, r * ch, cw + 0.5, ch + 0.5);
+    }
+  }
+
+  ctx.strokeStyle = "rgba(255,255,255,0.14)";
+  ctx.strokeRect(0.5, 0.5, w - 1, h - 1);
+}
+
+function drawPaletteThumb(canvasEl, colors) {
+  const ctx = canvasEl.getContext("2d");
+  const w = canvasEl.width;
+  const h = canvasEl.height;
+  const sw = w / colors.length;
+
+  ctx.clearRect(0, 0, w, h);
+  for (let i = 0; i < colors.length; i++) {
+    const col = colors[i];
+    ctx.fillStyle = `rgb(${col[0]},${col[1]},${col[2]})`;
+    ctx.fillRect(i * sw, 0, sw + 0.5, h);
+  }
+  ctx.strokeStyle = "rgba(255,255,255,0.18)";
+  ctx.strokeRect(0.5, 0.5, w - 1, h - 1);
+}
+
+function buildReferenceSets() {
+  return [
+    { name: "island", grid: makeReference(0) },
+    { name: "coast", grid: makeReference(1) },
+    { name: "river", grid: makeReference(2) },
+    { name: "ring", grid: makeReference(3) },
+    { name: "volcano", grid: makeReference(4) },
+    { name: "patchwork", grid: makeReference(5) },
+    { name: "stripes", grid: makeReference(6) },
+    { name: "delta", grid: makeReference(7) },
+    { name: "canyon", grid: makeReference(8) },
+  ];
+}

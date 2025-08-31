@@ -1,10 +1,10 @@
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   overflow: hidden;
   font-family: system-ui, sans-serif;
-  background: #111;
-  color: #eee;
+  text-transform: capitalize;
 }
 
 canvas {
@@ -32,21 +32,76 @@ canvas {
   font-size: 18px;
 }
 
+.group {
+  margin-bottom: 18px;
+}
+
 label {
   display: block;
   margin: 10px 0 4px;
   font-size: 12px;
 }
 
-input, select {
+input,
+select {
   width: 100%;
   margin-bottom: 10px;
   box-sizing: border-box;
+  text-transform: capitalize;
 }
 
 button {
   width: 100%;
   margin-bottom: 10px;
   padding: 6px;
+  box-sizing: border-box;
+  text-transform: capitalize;
   cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+.buttonRow {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.buttonRow button {
+  flex: 1;
+  width: 0;
+  margin-bottom: 0;
+}
+
+#stats {
+  margin-top: 14px;
+  font-size: 12px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+.presetGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.presetBtn {
+  width: 100%;
+  padding: 6px;
+}
+
+.presetBtn canvas {
+  position: static;
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  image-rendering: pixelated;
+}
+
+.presetBtn .title {
+  margin-top: 4px;
+  font-size: 11px;
+  text-align: center;
 }

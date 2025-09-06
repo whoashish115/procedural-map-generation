@@ -1070,3 +1070,70 @@ function buildPaletteSets() {
     },
   ];
 }
+
+function keyPressed() {
+  if (key === " ") {
+    setDrawMode(!drawMode);
+  } else if (key === "1") {
+    curTerrain = T.WATER;
+    document.getElementById("terrainSelect").value = "0";
+  } else if (key === "2") {
+    curTerrain = T.SAND;
+    document.getElementById("terrainSelect").value = "1";
+  } else if (key === "3") {
+    curTerrain = T.GRASS;
+    document.getElementById("terrainSelect").value = "2";
+  } else if (key === "4") {
+    curTerrain = T.FOREST;
+    document.getElementById("terrainSelect").value = "3";
+  } else if (key === "5") {
+    curTerrain = T.MOUNTAIN;
+    document.getElementById("terrainSelect").value = "4";
+  } else if (key === "6") {
+    curTerrain = T.SNOW;
+    document.getElementById("terrainSelect").value = "5";
+  } else if (key === "e" || key === "E") {
+    curTerrain = -1;
+    document.getElementById("terrainSelect").value = "-1";
+  } else if (key === "g" || key === "G") {
+    seed = floor(random(1e9));
+    rebuildWorld();
+  } else if (key === "c" || key === "C") {
+    clearWorld();
+  } else if (key === "s" || key === "S") {
+    saveCanvas("procedural-map", "png");
+  } else if (key === "[") {
+    brushSize = max(1, brushSize - 1);
+    document.getElementById("brushSize").value = brushSize;
+    document.getElementById("brushSizeVal").textContent = brushSize;
+  } else if (key === "]") {
+    brushSize = min(20, brushSize + 1);
+    document.getElementById("brushSize").value = brushSize;
+    document.getElementById("brushSizeVal").textContent = brushSize;
+  }
+}
+
+function mousePressed() {
+  if (mouseX < mapW && mouseY < mapH && drawMode) {
+    paintAt(mouseX, mouseY);
+  }
+}
+
+function mouseDragged() {
+  if (mouseX < mapW && mouseY < mapH && drawMode) {
+    paintAt(mouseX, mouseY);
+  }
+}
+
+function mouseWheel(event) {
+  if (mouseX > mapW) return true;
+  brushSize = constrain(brushSize + (event.delta > 0 ? -1 : 1), 1, 20);
+  document.getElementById("brushSize").value = brushSize;
+  document.getElementById("brushSizeVal").textContent = brushSize;
+  return false;
+}
+
+function windowResized() {
+  resizeCanvas(max(100, windowWidth - PANEL_W), windowHeight);
+  rebuildWorld();
+}

@@ -4,6 +4,8 @@
   <meta charset="utf-8" />
   <title>Procedural Map Generator</title>
   <script src="p5-1.11.11.js"></script>
+  <script src="p5.webgpu.js"></script>
+  <script src="record.js"></script>
   <link rel="stylesheet" type="text/css" href="style.css" />
 </head>
 <body>
@@ -12,13 +14,10 @@
     <div class="group">
       <label>cell size <span id="cellSizeVal"></span></label>
       <input id="cellSize" type="range" min="4" max="20" value="6" />
-
       <label>brush size <span id="brushSizeVal"></span></label>
       <input id="brushSize" type="range" min="1" max="10" value="2" />
-
       <label>solve / frame <span id="solveVal"></span></label>
       <input id="solveSpeed" type="range" min="1" max="3000" value="700" />
-
       <label>terrain</label>
       <select id="terrainSelect">
         <option value="0">water</option>
@@ -27,16 +26,25 @@
         <option value="3">forest</option>
         <option value="4">mountain</option>
         <option value="5">snow</option>
+        <option value="-1">erase</option>
       </select>
-
       <button id="toggleBtn">Draw mode</button>
+      <button id="savePNG">PNG</button>
       <button id="clearBtn">Clear</button>
+      <button id="saveJPG">JPG</button>
       <button id="randomBtn">Random</button>
+      <button id="saveSVG">SVG</button>
     </div>
-
+    <div class="group">
+      <label>reference maps</label>
+      <div id="referenceGrid" class="presetGrid"></div>
+    </div>
+    <div class="group">
+      <label>color palettes</label>
+      <div id="paletteGrid" class="presetGrid"></div>
+    </div>
     <pre id="stats"></pre>
   </div>
-
   <script src="sketch.js"></script>
 </body>
 </html>

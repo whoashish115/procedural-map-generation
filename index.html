@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>Procedural Map Generator</title>
+  <script src="p5-1.11.11.js"></script>
+  <script src="p5.webgpu.js"></script>
+  <script src="record.js"></script>
+  <link rel="stylesheet" type="text/css" href="style.css" />
+</head>
+
+<body>
+  <div id="sidebar">
+    <h2>Procedural Map</h2>
+
+    <div class="group">
+      <label>cell size <span id="cellSizeVal"></span></label>
+      <input id="cellSize" type="range" min="4" max="20" value="6" />
+
+      <label>brush size <span id="brushSizeVal"></span></label>
+      <input id="brushSize" type="range" min="1" max="10" value="2" />
+
+      <label>solve / frame <span id="solveVal"></span></label>
+      <input id="solveSpeed" type="range" min="1" max="3000" value="700" />
+
+      <label>terrain</label>
+      <select id="terrainSelect">
+        <option value="0">water</option>
+        <option value="1">sand</option>
+        <option value="2">grass</option>
+        <option value="3">forest</option>
+        <option value="4">mountain</option>
+        <option value="5">snow</option>
+        <option value="-1">erase</option>
+      </select>
+
+      <div class="buttonRow">
+        <button id="toggleBtn">Draw mode</button>
+        <button id="savePNG">PNG</button>
+      </div>
+
+      <div class="buttonRow">
+        <button id="clearBtn">Clear</button>
+        <button id="saveJPG">JPG</button>
+      </div>
+
+      <div class="buttonRow">
+        <button id="randomBtn">Random</button>
+        <button id="saveSVG">SVG</button>
+      </div>
+      <label>brush type</label>
+      <select id="brushTypeSelect">
+        <option value="circle">Circle</option>
+        <option value="square">Square</option>
+        <option value="diamond">Diamond</option>
+        <option value="cross">Cross</option>
+        <option value="plus">Plus</option>
+        <option value="ring">Ring</option>
+        <option value="lineH">Horizontal Line</option>
+        <option value="lineV">Vertical Line</option>
+        <option value="scatter">Scatter</option>
+        <option value="checker">Checker</option>
+      </select>
+    </div>
+
+    <div class="group">
+      <label>reference maps</label>
+      <div id="referenceGrid" class="presetGrid"></div>
+    </div>
+
+    <div class="group">
+      <label>color palettes</label>
+      <div id="paletteGrid" class="presetGrid"></div>
+    </div>
+
+    <pre id="stats"></pre>
+  </div>
+
+  <script src="sketch.js"></script>
+</body>
+
+</html>
